@@ -7,8 +7,6 @@ env:
 
   APP_NAME: ""
 
-  APP_PORT: ""
-
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   IMAGE_REGISTRY_USER: ${{ github.actor }}
   IMAGE_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
@@ -87,41 +85,22 @@ jobs:
       run: |
         export IMAGE=${{ steps.push-image.outputs.registry-path }}
         export OPENSHIFT_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }}
-        export APP_NAME=${{ env.APP_NAME }}
 
-        
         echo ${{ steps.push-image.outputs.registry-path }}
-        sed -i 's|\${IMAGE}|'"$IMAGE"'|g' deployment/base/deployment-w-storage.yaml deployment/base/service.yaml
-        sed -i 's|\${APP_NAME}|'"$APP_NAME"'|g' deployment/base/deployment-w-storage.yaml deployment/base/service.yaml  deployment/base/configmap-w-storage.yaml deployment/base/secret.yaml  
-        sed -i 's|\${OPENSHIFT_NAMESPACE}|'"$OPENSHIFT_NAMESPACE"'|g' deployment/base/deployment-w-storage.yaml deployment/base/service.yaml  deployment/base/configmap-w-storage.yaml deployment/base/secret.yaml  
-        sed -i 's|\${IMAGE}|'"$IMAGE"'|g' deployment/base/deployment-w-storage.yaml deployment/base/service.yaml
-        sed -i 's|\${APP_NAME}|'"$APP_NAME"'|g'  deployment/base/pvc.yaml deployment/overlays/release/configmap-patch.yaml 
-        sed -i 's|\${OPENSHIFT_NAMESPACE}|'"$OPENSHIFT_NAMESPACE"'|g' deployment/base/pvc.yaml deployment/overlays/release/configmap-patch.yaml
-        sed -i 's|\${APP_NAME}|'"$APP_NAME"'|g' deployment/base/route.yaml
-        sed -i 's|\${OPENSHIFT_NAMESPACE}|'"$OPENSHIFT_NAMESPACE"'|g' deployment/base/route.yaml
+
+        sed -i 's|\IMAGE_PLACEHOLDER|'"$IMAGE"'|g' Day2/deployment/deployment.yaml
         
-        oc apply -f deployment/base/pvc.yaml
-        oc apply -f deployment/base/configmap-w-storage.yaml -f deployment/base/secret.yaml
-        oc apply -f deployment/base/deployment-w-storage.yaml -f deployment/base/service.yaml
-        
-        #kustomize
-        oc apply -k deployment/overlays/release        
+        oc apply -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
+        oc apply -f Day1/network/service.yaml -n $OPENSGIFT_NAMSPACE      
         
         oc get pods
+        oc get svc
 
     - name: create route
       run: | 
         export OPENSHIFT_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }}
-        export APP_NAME=${{ env.APP_NAME }}
-        
-        sed -i 's|\${APP_NAME}|'"$APP_NAME"'|g' deployment/base/route.yaml
-        sed -i 's|\${OPENSHIFT_NAMESPACE}|'"$OPENSHIFT_NAMESPACE"'|g' deployment/base/route.yaml
-        oc apply -f deployment/base/route.yaml
+        oc apply -f Day1/network/route.yaml -n $OPENSHIFT_NAMESPACE
 
-    - name: get route
-      run: | 
-        ROUTE=$(oc get route $${{ env.APP_NAME }} -n ${{ env.OPENSHIFT_NAMESPACE }} -o jsonpath='{.spec.host}')
-
-        echo "The route is: http://$ROUTE"
+        oc get route
         
     

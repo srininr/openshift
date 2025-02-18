@@ -1,0 +1,11 @@
+resources:
+  - ../../base
+
+patchesStrategicMerge:
+  - patch-deployment.yaml
+  - patch-service.yaml
+  - patch-route.yaml
+
+nameSuffix: "-test"
+commonLabels:
+  app: node-app-test

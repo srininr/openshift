@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-volconf
+spec:
+  serviceName: mysql-volconf
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-volconf
+  template:
+    metadata:
+      labels:
+        app: mysql-volconf
+    spec:
+      containers:
+      - name: mysql-volconf
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "supersecurepassword"
+        - name: MYSQL_USER
+          value: "myuser"
+        - name: MYSQL_PASSWORD
+          value: "mypassword"
+        - name: MYSQL_DATABASE
+          value: "mydatabase"
+        ports:
+        - containerPort: 3307
+        volumeMounts:
+        - name: mysql-vol-config
+          mountPath: /etc/mysql/conf.d
+          readOnly: true
+  volumes:
+  - name: mysql-config
+    configMap:
+      name: mysql-config

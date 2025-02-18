@@ -1,0 +1,1 @@
+oc label namespace default openshift.io/cluster-monitoring=true

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  selector:
+    matchLabels:
+      app: node-app-test
+  template:
+    metadata:
+      labels:
+        app: node-app-test
+    spec:
+      containers:
+        - name: node-app
+          env:
+            - name: CAPSTONE
+              value: "Grey"

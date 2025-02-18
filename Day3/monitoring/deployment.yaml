@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-metrics
+  labels:
+    app: nginx-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-metrics
+  template:
+    metadata:
+      labels:
+        app: nginx-metrics
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest  # Standard-Nginx statt Bitnami
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d
+        - name: metrics-volume
+          mountPath: /usr/share/nginx/html
+      - name: metrics
+        image: busybox
+        command: ["/bin/sh", "-c", "while true; do echo 'random_metric' $(awk -v min=1 -v max=100 'BEGIN{srand(); print int(min+rand()*(max-min+1))}') > /usr/share/nginx/html/metrics; sleep 5; done"]
+        volumeMounts:
+        - name: metrics-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-config
+      - name: metrics-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  metrics.conf: |
+    server {
+      listen 8080;
+      location /metrics {
+        root /usr/share/nginx/html;
+        default_type text/plain;
+      }
+    }

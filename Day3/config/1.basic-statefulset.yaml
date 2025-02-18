@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-basic
+spec:
+  serviceName: mysql-asic
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-basic
+  template:
+    metadata:
+      labels:
+        app: mysql-basic
+    spec:
+      containers:
+      - name: mysql-basic
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "supersecurepassword"
+        - name: MYSQL_USER
+          value: "myuser"
+        - name: MYSQL_PASSWORD
+          value: "mypassword"
+        - name: MYSQL_DATABASE
+          value: "mydatabase"
+        ports:
+        - containerPort: 3306

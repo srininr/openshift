@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cs-mysql
+spec:
+  serviceName: cs-mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cs-mysql
+  template:
+    metadata:
+      labels:
+        app: cs-mysql
+    spec:
+      containers:
+      - name: cs-mysql
+        image: mysql:latest
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: cs-mysql-secret
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cs-mysql-secret
+              key: MYSQL_PASSWORD
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cs-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: cs-mysql-secret
+              key: MYSQL_DATABASE
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: cs-mysql-data
+          mountPath: /var/lib/mysql
+        - name: cs-mysql-logs
+          mountPath: /var/log/mysql
+      volumes:
+      - name: cs-mysql-data
+        persistentVolumeClaim:
+          claimName: cs-mysql-data
+      - name: cs-mysql-logs
+        persistentVolumeClaim:
+          claimName: cs-mysql-logs

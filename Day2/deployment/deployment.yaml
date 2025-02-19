@@ -13,6 +13,8 @@ spec:
         app: nginx
     spec:
       containers:
+        imagePullSecrets:
+        - name: ghcr-pull-secret
       - name: nginx
         image: IMAGE_PLACEHOLDER
         ports:

@@ -1,11 +1,15 @@
 resources:
-  - ../../base
+- ../../base
 
-patchesStrategicMerge:
-  - patch-deployment.yaml
-  - patch-service.yaml
-  - patch-route.yaml
 
-nameSuffix: "-prod"
-commonLabels:
-  app: node-app-prod
+nameSuffix: -prod
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+- includeSelectors: true
+  pairs:
+    app: node-app-prod
+patches:
+- path: deployment-patch.yaml
+- path: service-patch.yaml
+- path: route-patch.yaml

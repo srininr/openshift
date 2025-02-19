@@ -1,11 +1,15 @@
 resources:
-  - ../../base
+- ../../base
 
-patchesStrategicMerge:
-  - patch-deployment.yaml
-  - patch-service.yaml
-  - patch-route.yaml
 
-nameSuffix: "-test"
-commonLabels:
-  app: node-app-test
+nameSuffix: -test
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+- includeSelectors: true
+  pairs:
+    app: node-app-test
+patches:
+- path: deployment-patch.yaml
+- path: service-patch.yaml
+- path: route-patch.yaml

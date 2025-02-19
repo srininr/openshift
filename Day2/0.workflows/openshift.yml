@@ -91,7 +91,7 @@ jobs:
         sed -i 's|\IMAGE_PLACEHOLDER|'"$IMAGE"'|g' Day2/deployment/deployment.yaml
         
         oc apply -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
-        oc apply -f Day1/network/service.yaml -n $OPENSGIFT_NAMSPACE      
+        oc apply -f Day1/network/service.yaml -n $OPENSHIFT_NAMESPACE      
         
         oc get pods
         oc get svc

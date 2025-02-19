@@ -8,3 +8,4 @@ spec:
     name: nginx
   port:
     targetPort: 8080
+git 

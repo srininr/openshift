@@ -12,9 +12,9 @@ spec:
       labels:
         app: nginx
     spec:
-      containers:
-        imagePullSecrets:
+      imagePullSecrets:
         - name: ghcr-pull-secret
+      containers:
       - name: nginx
         image: IMAGE_PLACEHOLDER
         ports:

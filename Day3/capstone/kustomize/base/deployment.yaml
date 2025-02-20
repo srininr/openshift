@@ -12,8 +12,6 @@ spec:
       labels:
         app: node-app
     spec:
-      imagePullSecrets:
-        - name: ghcr-pull-secret
       containers:
         - name: node-app
           image: IMAGE_PLACEHOLDER
@@ -21,10 +19,7 @@ spec:
             - name: DB_HOST
               value: mysql
             - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: MYSQL_USER
+              value: root
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -32,7 +27,7 @@ spec:
                   key: MYSQL_PASSWORD
             - name: DB_NAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: mysql-config
                   key: MYSQL_DATABASE
             - name: CAPSTONE

@@ -25,12 +25,12 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: cs-mysql-secret
                   key: MYSQL_PASSWORD
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  name: mysql-secret
+                  name: cs-mysql-secret
                   key: MYSQL_DATABASE
             - name: CAPSTONE
               value: "Blue"

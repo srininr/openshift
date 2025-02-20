@@ -7,6 +7,8 @@ env:
 
   APP_NAME: ""
 
+  APP_PORT: ""
+
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   IMAGE_REGISTRY_USER: ${{ github.actor }}
   IMAGE_REGISTRY_PASSWORD: ${{ secrets.GHCR_TOKEN }}
@@ -22,8 +24,6 @@ on:
 jobs:
  
   openshift-ci-cd:
-    # 🖊️ Uncomment this if you are using CRDA scan step above
-    # needs: crda-scan
     name: Build and deploy to OpenShift
     runs-on: ubuntu-latest
     environment: production
@@ -53,9 +53,9 @@ jobs:
       with:
         image: ${{ env.APP_NAME }}
         tags: ${{ env.IMAGE_TAGS }}
-
+        context: ./Day3/capstone 
         dockerfiles: |
-          ./Day1/Container/Dockerfile
+          ./Day3/capstone/docker/Dockerfile
         
     - name: Push to registry
       id: push-image
@@ -80,27 +80,44 @@ jobs:
         openshift_token: ${{ env.OPENSHIFT_TOKEN }}
         insecure_skip_tls_verify: true
         namespace: ${{ env.OPENSHIFT_NAMESPACE }}
+    - name: Capstone Database Deployment
+      run: |
+        export OPENSHIFT_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }}
 
-    - name: my deployment 
+        oc project "$OPENSHIFT_NAMESPACE"
+
+        echo "Applying database manifests..."
+        oc apply -f Day3/capstone/database
+
+    - name: Capstone APP Deployment
       run: |
         export IMAGE=${{ steps.push-image.outputs.registry-path }}
         export OPENSHIFT_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }}
 
-        echo ${{ steps.push-image.outputs.registry-path }}
+        echo "Using image: $IMAGE"
 
-        sed -i 's|\IMAGE_PLACEHOLDER|'"$IMAGE"'|g' Day2/deployment/deployment.yaml
-        
-        oc apply -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
-        oc apply -f Day1/network/service.yaml -n $OPENSHIFT_NAMESPACE      
-        
-        oc get pods
-        oc get svc
+        # Ersetze IMAGE_PLACEHOLDER nur in der richtigen Datei
+        sed -i "s|IMAGE_PLACEHOLDER|$IMAGE|g" Day3/capstone/kustomize/base/deployment.yaml
 
-    - name: create route
-      run: | 
+        oc project "$OPENSHIFT_NAMESPACE"
+
+        echo "Applying base deployment..."
+        oc apply -k Day3/capstone/kustomize/base || { echo "Base deployment failed!"; exit 1; }
+
+        echo "Applying production deployment..."
+        oc apply -k Day3/capstone/kustomize/overlays/prod || { echo "Production deployment failed!"; exit 1; }
+
+        echo "Applying test deployment..."
+        oc apply -k Day3/capstone/kustomize/overlays/test || { echo "Test deployment failed!"; exit 1; }
+
+        echo "Fetching pod status..."
+        oc get pods -n "$OPENSHIFT_NAMESPACE"
+
+    - name: Capstone Apply Canary Route
+      run: |
         export OPENSHIFT_NAMESPACE=${{ env.OPENSHIFT_NAMESPACE }}
-        oc apply -f Day1/network/route.yaml -n $OPENSHIFT_NAMESPACE
 
-        oc get route
-        
-    
+        oc project "$OPENSHIFT_NAMESPACE"
+
+        echo "Applying Canary Route..."
+        oc apply -f Day3/capstone/canary || { echo "Canary Route deployment failed!"; exit 1; }

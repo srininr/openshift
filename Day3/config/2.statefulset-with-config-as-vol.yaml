@@ -28,10 +28,10 @@ spec:
         ports:
         - containerPort: 3307
         volumeMounts:
-        - name: mysql-vol-config
+        - name: mysql-config
           mountPath: /etc/mysql/conf.d
           readOnly: true
-  volumes:
-  - name: mysql-config
-    configMap:
-      name: mysql-config
+      volumes:
+      - name: mysql-config
+        configMap:
+          name: mysql-vol-config

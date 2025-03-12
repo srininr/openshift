@@ -42,11 +42,11 @@ spec:
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
-  volumeClaimTemplates:
-  - metadata:
-      name: mysql-data
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 5Gi
+      volumeClaimTemplates:
+      - metadata:
+          name: mysql-data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi

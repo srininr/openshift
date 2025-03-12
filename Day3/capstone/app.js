@@ -32,14 +32,21 @@ async function initDB() {
 app.get("/", async (req, res) => {
   try {
     const conn = await mysql.createConnection(dbConfig);
-    const [rows] = await conn.execute("SELECT * FROM entries ORDER BY id DESC");
+    const [rows] = await conn.execute("SELECT * FROM entries ORDER BY id DESC LIMIT 5");
     conn.end();
-    res.json({
-      message: "All Entries",
-      replica: replicaId,
-      data: rows,
-      capstone: capstone
-    });
+
+    res.setHeader("Content-Type", "application/json");
+    res.send(
+      JSON.stringify(
+        {
+          message: "All Entries from " + capstone,
+          replica: replicaId,
+          data: rows
+        },
+        null,
+        2
+      )
+    );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

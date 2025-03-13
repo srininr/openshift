@@ -92,10 +92,9 @@ jobs:
         
         oc apply -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
         oc apply -f Day1/network/service.yaml -n $OPENSHIFT_NAMESPACE      
-        oc delete -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
-        oc delete -f Day1/network/service.yaml -n $OPENSHIFT_NAMESPACE   
-
         oc get secret superadmin -oyaml
+        oc delete -f Day2/deployment/deployment.yaml -n $OPENSHIFT_NAMESPACE
+        oc delete -f Day1/network/service.yaml -n $OPENSHIFT_NAMESPACE 
         
         oc get pods
         oc get svc
